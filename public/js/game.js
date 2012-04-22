@@ -8,7 +8,7 @@ window.onload = (function() {
      * There is only one Sprite in the file. It is mostly transparent
      * so the background color will shine through it.
      */
-    Crafty.sprite(32, "../../img/crate.png", { crate: [0, 0]});
+    //Crafty.sprite(32, "../../img/crate.png", { crate: [0, 0]});
 
     /**
      * This is a simple component, a Box, which again gets capabilities from these
@@ -22,12 +22,16 @@ window.onload = (function() {
      */
     Crafty.c("Box", {
         init: function() {
-            this.addComponent("2D, Canvas, Color, Fourway, Mouse, Tween, crate, Text");
+            this.addComponent("2D, Canvas, Color, Mouse, Tween, Text");
+            //this.addComponent("2D, Canvas, Color, Mouse, Tween");
 
             this.w = 32;    // width
             this.h = 32;    // height
-            this.fourway(10);   // initalize 4-way movement
-            this.text("Wer das liest ist doof");
+            this.text("X");
+            this.textColor('#CCCCCC', 1.0);
+            this.textFont({ type: 'italic', family: 'Arial' });
+            
+            //this.fourway(10);   // initalize 4-way movement
 
             /*
              * An 'enterframe' event is created by Crafty for every frame that is
@@ -54,15 +58,17 @@ window.onload = (function() {
         /**
          * Convenience method which sets the box position and color
          */
-        makeBox: function(x, y, color) {
-            this.attr({x: x, y: y}).color(color);
+        makeBox: function(x, y, color, z) {
+            this.attr({x: x, y: y}).color(color).text(z);
+            //this.attr({x: x, y: y}).color(color);
         }
+        
     });
 
     // create 5 boxes of different colors and place them on the canvas
-    Crafty.e("Box").makeBox(160, 96, "#F00");
-    Crafty.e("Box").makeBox(240, 96, "#0F0");
-    Crafty.e("Box").makeBox(320, 96, "#FF0");
-    Crafty.e("Box").makeBox(400, 96, "#F0F");
-    Crafty.e("Box").makeBox(480, 96, "#0FF");
+    Crafty.e("Box").makeBox(160, 96, "#F00", 1);
+    Crafty.e("Box").makeBox(240, 96, "#0F0", 2);
+    Crafty.e("Box").makeBox(320, 96, "#FF0", 3);
+    Crafty.e("Box").makeBox(400, 96, "#F0F", 4);
+    Crafty.e("Box").makeBox(480, 96, "#0FF", 5);
 });
