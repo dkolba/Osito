@@ -1,74 +1,97 @@
 window.onload = (function() {
-    var WIDTH = 800,
-        HEIGHT = 640;
+    var WIDTH = 640,
+    	HEIGHT = 800,
+        SYMBOL_WIDTH = 100 ,
+		SYMBOL_HEIGHT = 100;
     Crafty.init(WIDTH, HEIGHT);
 
-    /*
-     * Create Sprites of size 32 from the PNG file.
-     * There is only one Sprite in the file. It is mostly transparent
-     * so the background color will shine through it.
-     */
-    //Crafty.sprite(32, "../../img/crate.png", { crate: [0, 0]});
-
-    /**
-     * This is a simple component, a Box, which again gets capabilities from these
-     * other components:
-     *  - 2D, Canvas: can be drawn on a Canvas
-     *  - Color: has a Background Color
-     *  - Fourway: can be moved with WASD and arrow keys
-     *  - Mouse: reacts on mouse events, like click
-     *  - Tween: simple animation, used here for fading out after mouse click
-     *  - crate: That's the Sprite defined above, not really a JS component
-     */
-    Crafty.c("Box", {
+    // "Number" component, kann eigentlich noch gar nix
+    Crafty.c("Number", {
         init: function() {
-            this.addComponent("2D, Canvas, Color, Mouse, Tween, Text");
-            //this.addComponent("2D, Canvas, Color, Mouse, Tween");
+            this.addComponent("2D, Canvas, Color");
 
-            this.w = 32;    // width
-            this.h = 32;    // height
-            this.text("X");
-            this.textColor('#CCCCCC', 1.0);
-            this.textFont({ type: 'italic', family: 'Arial' });
+            this.w = SYMBOL_WIDTH;    // width
+            this.h = SYMBOL_HEIGHT;    // height
+        },
+                
+        makeBox: function(x, y, color, z) {
+            this.attr({x: x, y: y}).color(color);
+        }
+        
+    });
+
+    // "Symbol" component
+    Crafty.c("Symbol", {
+        init: function() {
+            this.addComponent("2D, Canvas, Color, Mouse, Tween");
+
+            this.w = SYMBOL_WIDTH;    // width
+            this.h = SYMBOL_HEIGHT;    // height
             
-            //this.fourway(10);   // initalize 4-way movement
-
-            /*
-             * An 'enterframe' event is created by Crafty for every frame that is
-             * created. Components should update their status in the phase.
-             * Here we check if the alpha gradient is < 0.1, in which case the
-             * entity gets destroyed.
-             * The alpha value gets changed by the Tween component.
-             */
             this.bind("EnterFrame", function(e) {
                 if (this._alpha < 0.1) {
                     this.destroy();
                 }
             });
-            /*
-             * This defines the handler method for mouse clicks.
-             * Here we tell the entity to gradually change its alpha gradient to 0.0.
-             * This is done with the Tween component and it takes 50 frames from 1.0 to 0.0.
-             */
+ 
             this.bind("Click", function(e) {
-                console.log(arguments);
                 this.tween({alpha: 0.0}, 50);
             });
         },
+        
         /**
-         * Convenience method which sets the box position and color
+         * function Erstellt das Symbol, bis jetzt nur ein farbiges Quadrat
          */
-        makeBox: function(x, y, color, z) {
-            this.attr({x: x, y: y}).color(color).text(z);
-            //this.attr({x: x, y: y}).color(color);
+        makeBox: function(x, y, color) {
+            this.attr({x: x, y: y}).color(color);
         }
         
     });
 
-    // create 5 boxes of different colors and place them on the canvas
-    Crafty.e("Box").makeBox(160, 96, "#F00", 1);
-    Crafty.e("Box").makeBox(240, 96, "#0F0", 2);
-    Crafty.e("Box").makeBox(320, 96, "#FF0", 3);
-    Crafty.e("Box").makeBox(400, 96, "#F0F", 4);
-    Crafty.e("Box").makeBox(480, 96, "#0FF", 5);
+    // "Game" component
+    Crafty.c("Game", {
+    	
+    	// Vordefinierte "Symbole" hier einfach Farben
+    	COLORS: ["#F00", "#0F0", "#FF0", "#F0F", "#0FF"],
+    	
+        init: function() {
+            this.addComponent("2D, Canvas, Color");
+            this.symbols = this._shuffle(this.COLORS); // Farben-Array wird gemischt
+            this._setupGame(SYMBOL_WIDTH, SYMBOL_HEIGHT);
+        },
+                
+        _setupGame: function() {
+            this._game = [];
+            for (var r = 0; r < this.COLORS.length; r++) { // Fuer Anzahl der Farben im Array
+                var that = this;
+                var newSymbol = Crafty.e("Symbol").makeBox(100 + r * SYMBOL_WIDTH
+                                    , 250
+                                    , this.symbols[r]
+                                    );
+                this._game[r] = newSymbol;
+            }
+        },
+        
+        /**
+         * Mischfunktion fuer das Farben-Array (Misch-Algorithmus nach Fisher-Yates)
+         */
+        _shuffle: function(COLORS) {
+            for (var n = 0; n < COLORS.length - 1; n++) {
+                var k = n + Math.floor(Math.random() * (COLORS.length - n));
+                var temp = COLORS[k];
+                COLORS[k] = COLORS[n];
+                COLORS[n] = temp;
+            }
+            
+            console.log(COLORS); // noch nicht rausgefunden, wo ma diese Logs einsehen kann
+            return COLORS; //Rueckgabe des gemischten Arrays
+        }
+        
+    });
+    
+    // Number component wird benutzt
+    Crafty.e("Number").makeBox(300, 100, "#F00");
+
+    // Game component wird benutzt
+    Crafty.e("Game");
 });
