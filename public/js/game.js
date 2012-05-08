@@ -33,17 +33,25 @@ window.onload = (function() {
                     this.destroy();
                 }
             });
- 
-            this.bind("Click", function(e) {
+            
+            // Click
+            this.bind("Click", function(obj) {
                 this.tween({alpha: 0.0}, 50);
+                if (this._onClickCallback) this._onClickCallback({
+                    x: obj.realX,     
+                    y: obj.realY,
+                    color: this._color
+                });
             });
         },
         
         /**
          * function Erstellt das Symbol, bis jetzt nur ein farbiges Quadrat
          */
-        makeBox: function(x, y, color) {
+        makeSymbol: function(x, y, color, onClickCallback) {
             this.attr({x: x, y: y}).color(color);
+            this._onClickCallback = onClickCallback;
+            return this;
         }
         
     });
@@ -63,17 +71,23 @@ window.onload = (function() {
         _setupGame: function() {
             this._game = [];
             for (var r = 0; r < this.COLORS.length; r++) { // Fuer Anzahl der Farben im Array
+            	
                 var that = this;
-                var newSymbol = Crafty.e("Symbol").makeBox(100 + r * SYMBOL_WIDTH
+                var newSymbol = Crafty.e("Symbol").makeSymbol(100 + r * SYMBOL_WIDTH
                                     , 250
                                     , this.symbols[r]
+					                , function () {
+					                    that._clickHandler.apply(that, arguments);	// bind to 'this' context!
+					                }	
                                     );
+                
                 this._game[r] = newSymbol;
             }
         },
         
         /**
          * Mischfunktion fuer das Farben-Array (Misch-Algorithmus nach Fisher-Yates)
+         * Everyday i'm shuffling
          */
         _shuffle: function(COLORS) {
             for (var n = 0; n < COLORS.length - 1; n++) {
@@ -83,15 +97,30 @@ window.onload = (function() {
                 COLORS[n] = temp;
             }
             
-            console.log(COLORS); // noch nicht rausgefunden, wo ma diese Logs einsehen kann
+            console.log(COLORS); // Reihenfolge in die Logs geschrieben
             return COLORS; //Rueckgabe des gemischten Arrays
-        }
+        },
         
+        // Clickhandler
+        _clickHandler: function(obj) {
+            console.log(obj.x, obj.y ); // Log Koordinaten
+            var aPos = this._translateToArrayPos(obj.x);
+            console.log(aPos);			// Log Array Position
+        },
+       
+        // Uebersetzt Klickpostition in ArrayPosition
+        _translateToArrayPos: function(x) {
+            return {
+                x: Math.floor((x - 100) / SYMBOL_WIDTH)
+            };
+        }
     });
     
     // Number component wird benutzt
     Crafty.e("Number").makeBox(300, 100, "#F00");
+    console.log("Number");
 
     // Game component wird benutzt
     Crafty.e("Game");
+    console.log("Game");
 });
