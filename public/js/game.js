@@ -60,7 +60,7 @@ window.onload = (function() {
     Crafty.c("Game", {
     	
     	// Vordefinierte "Symbole" hier einfach Farben
-    	COLORS: ["#F00", "#0F0", "#FF0", "#F0F", "#0FF"],
+    	COLORS: ["#F00", "#0F0", "#FF0", "#F0F", "#0FF", "#CCF", "#F93", "#606", "#C90", "#03C"],
     	
         init: function() {
             this.addComponent("2D, Canvas, Color");
@@ -70,19 +70,23 @@ window.onload = (function() {
                 
         _setupGame: function() {
             this._game = [];
-            for (var r = 0; r < this.COLORS.length; r++) { // Fuer Anzahl der Farben im Array
-            	
-                var that = this;
-                var newSymbol = Crafty.e("Symbol").makeSymbol(100 + r * SYMBOL_WIDTH
-                                    , 250
-                                    , this.symbols[r]
-					                , function () {
-					                    that._clickHandler.apply(that, arguments);	// bind to 'this' context!
-					                }	
-                                    );
-                
-                this._game[r] = newSymbol;
-            }
+            
+            var s = 0;
+            for (var c = 0; c < 2; c++) {
+	            for (var r = 0; r < 5; r++) { // Fuer Anzahl der Farben im Array
+	                var that = this;
+	                var newSymbol = Crafty.e("Symbol").makeSymbol(100 + r * SYMBOL_WIDTH
+	                                    , 250 + (SYMBOL_HEIGHT * 2 - (c + 1) * SYMBOL_HEIGHT) 
+	                                    , this.symbols[s]
+						                , function () {
+						                    that._clickHandler.apply(that, arguments);	// bind to 'this' context!
+						                }	
+	                                    );
+	                
+	                this._game[r] = newSymbol;
+	                s++;
+	            }
+	        }
         },
         
         /**
@@ -104,14 +108,15 @@ window.onload = (function() {
         // Clickhandler
         _clickHandler: function(obj) {
             console.log(obj.x, obj.y ); // Log Koordinaten
-            var aPos = this._translateToArrayPos(obj.x);
+            var aPos = this._translateToArrayPos(obj.x, obj.y);
             console.log(aPos);			// Log Array Position
         },
        
         // Uebersetzt Klickpostition in ArrayPosition
-        _translateToArrayPos: function(x) {
+        _translateToArrayPos: function(x, y) {
             return {
-                x: Math.floor((x - 100) / SYMBOL_WIDTH)
+                x: Math.floor((x - 100) / SYMBOL_WIDTH),
+                y: 1 - Math.floor((y - 250) / SYMBOL_HEIGHT)
             };
         }
     });
