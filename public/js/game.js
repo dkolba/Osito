@@ -2,20 +2,22 @@ window.onload = (function() {
     var WIDTH = 640,
     	HEIGHT = 800,
         SYMBOL_WIDTH = 100 ,
-		SYMBOL_HEIGHT = 100;
+		SYMBOL_HEIGHT = 100,
+		COLORS = ["#F00", "#0F0", "#FF0", "#F0F", "#0FF", "#CCF", "#F93", "#606", "#C90", "#03C"];
     Crafty.init(WIDTH, HEIGHT);
 
     // "Number" component, kann eigentlich noch gar nix
     Crafty.c("Number", {
         init: function() {
             this.addComponent("2D, Canvas, Color");
-
             this.w = SYMBOL_WIDTH;    // width
             this.h = SYMBOL_HEIGHT;    // height
         },
                 
-        makeBox: function(x, y, color, z) {
+        makeNumber: function(x, y) {
+        	var color = COLORS[Math.floor(Math.random()*9)]; //zufaellige Zahl zwischen 0-9 -> ARRAY COLORS
             this.attr({x: x, y: y}).color(color);
+            return this;
         }
         
     });
@@ -24,7 +26,6 @@ window.onload = (function() {
     Crafty.c("Symbol", {
         init: function() {
             this.addComponent("2D, Canvas, Color, Mouse, Tween");
-
             this.w = SYMBOL_WIDTH;    // width
             this.h = SYMBOL_HEIGHT;    // height
             
@@ -53,27 +54,23 @@ window.onload = (function() {
             this._onClickCallback = onClickCallback;
             return this;
         }
-        
     });
 
     // "Game" component
     Crafty.c("Game", {
-    	
-    	// Vordefinierte "Symbole" hier einfach Farben
-    	COLORS: ["#F00", "#0F0", "#FF0", "#F0F", "#0FF", "#CCF", "#F93", "#606", "#C90", "#03C"],
-    	
         init: function() {
             this.addComponent("2D, Canvas, Color");
-            this.symbols = this._shuffle(this.COLORS); // Farben-Array wird gemischt
+            this.symbols = this._shuffle(COLORS); // Farben-Array wird gemischt
             this._setupGame(SYMBOL_WIDTH, SYMBOL_HEIGHT);
+        	this.number = Crafty.e("Number").makeNumber(300, 100); // Number component wird benutzt
         },
                 
         _setupGame: function() {
             this._game = [];
             
             var s = 0;
-            for (var c = 0; c < 2; c++) {
-	            for (var r = 0; r < 5; r++) { // Fuer Anzahl der Farben im Array
+            for (var c = 0; c <= 1; c++) {		// Zwei Reihen
+	            for (var r = 0; r < 5; r++) { 	// Anzahl pro Reihe 
 	                var that = this;
 	                var newSymbol = Crafty.e("Symbol").makeSymbol(100 + r * SYMBOL_WIDTH
 	                                    , 250 + (SYMBOL_HEIGHT * 2 - (c + 1) * SYMBOL_HEIGHT) 
@@ -87,6 +84,10 @@ window.onload = (function() {
 	                s++;
 	            }
 	        }
+        },
+        
+        _setupNumber: function() {
+        	return Crafty.e("Number").makeNumber(300, 100); // Number component wird benutzt
         },
         
         /**
@@ -107,25 +108,16 @@ window.onload = (function() {
         
         // Clickhandler
         _clickHandler: function(obj) {
-            console.log(obj.x, obj.y ); // Log Koordinaten
-            var aPos = this._translateToArrayPos(obj.x, obj.y);
-            console.log(aPos);			// Log Array Position
-        },
-       
-        // Uebersetzt Klickpostition in ArrayPosition
-        _translateToArrayPos: function(x, y) {
-            return {
-                x: Math.floor((x - 100) / SYMBOL_WIDTH),
-                y: 1 - Math.floor((y - 250) / SYMBOL_HEIGHT)
-            };
+            console.log(obj.color );
+            if (obj.color === this.number._color ) {
+                console.log('Farbe ist richtig');
+            } else {
+            	console.log('Farbe ist NICHT richtig');
+            }
         }
+       
     });
     
-    // Number component wird benutzt
-    Crafty.e("Number").makeBox(300, 100, "#F00");
-    console.log("Number");
-
     // Game component wird benutzt
     Crafty.e("Game");
-    console.log("Game");
 });
